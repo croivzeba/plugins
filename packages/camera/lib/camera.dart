@@ -477,6 +477,36 @@ class CameraController extends ValueNotifier<CameraValue> {
     }
   }
 
+  /// Toggles torch to [enabled] if torch is available.
+  ///
+  /// Throws a [CameraException] if the capture fails.
+  Future<void> torch(bool enabled) async {
+    if (!value.isInitialized || _isDisposed) {
+      throw CameraException(
+        'Uninitialized CameraController.',
+        'torch was called on uninitialized CameraController',
+      );
+    }
+    await _channel.invokeMethod<void>(
+      'torch',
+      <String, dynamic>{'enabled': enabled},
+    );
+  }
+
+  /// Checks whether a torch is available.
+  Future<bool> hasTorch() async {
+    if (!value.isInitialized || _isDisposed) {
+      throw CameraException(
+        'Uninitialized CameraController.',
+        'torch was called on uninitialized CameraController',
+      );
+    }
+      return await _channel.invokeMethod<bool>(
+        'hasTorch',
+        <String, dynamic>{},
+      );
+  }
+
   /// Releases the resources of this camera.
   @override
   Future<void> dispose() async {

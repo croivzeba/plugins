@@ -37,6 +37,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   VideoPlayerController videoController;
   VoidCallback videoPlayerListener;
   bool enableAudio = true;
+  bool enableTorch = false;
 
   @override
   void initState() {
@@ -93,6 +94,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
           ),
           _captureControlRowWidget(),
           _toggleAudioWidget(),
+          _toggleTorchWidget(),
           Padding(
             padding: const EdgeInsets.all(5.0),
             child: Row(
@@ -140,6 +142,37 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
               enableAudio = value;
               if (controller != null) {
                 onNewCameraSelected(controller.description);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Toggle torch
+  Widget _toggleTorchWidget() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 25),
+      child: Row(
+        children: <Widget>[
+          const Text('Enable Torch:'),
+          Switch(
+            value: enableTorch,
+            onChanged: (bool value) async {
+              if (controller == null) {
+                showInSnackBar('Error: select a camera first.');
+                return;
+              }
+              if(!await controller.hasTorch()) {
+                showInSnackBar('This camera does not have a torch');
+                return;
+              }
+              setState(() {
+                enableTorch = value;
+              });
+              if (controller != null) {
+                controller.torch(enableTorch);
               }
             },
           ),

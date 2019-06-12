@@ -186,6 +186,25 @@ public class CameraPlugin implements MethodCallHandler {
           }
           break;
         }
+      case "torch":
+        {
+          final Boolean enabled = call.argument("enabled");
+          try {
+            camera.torch(enabled);
+          } catch (CameraAccessException e) {
+            handleException(e, result);
+          }
+          break;
+        }
+      case "hasTorch":
+        {
+          try {
+            result.success(camera.hasTorch());
+          } catch (CameraAccessException e) {
+            handleException(e, result);
+          }
+          break;
+        }
       case "dispose":
         {
           if (camera != null) {
@@ -895,6 +914,30 @@ public class CameraPlugin implements MethodCallHandler {
               ? 0
               : (isFrontFacing) ? -currentOrientation : currentOrientation;
       return (sensorOrientationOffset + sensorOrientation + 360) % 360;
+    }
+
+    private void torch(boolean enabled) throws CameraAccessException {
+      if(camera == null || !hasTorch()) return;
+
+      if(enabled) {
+        captureRequestBuilder.set(
+                CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH);
+        captureRequestBuilder.set(
+                CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+      } else {
+        captureRequestBuilder.set(
+                CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_SINGLE);
+        captureRequestBuilder.set(
+                CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+      }
+      cameraCaptureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null);
+    }
+
+    private boolean hasTorch() throws CameraAccessException {
+      if(camera == null) return false;
+
+      return cameraManager.getCameraCharacteristics(cameraDevice.getId())
+              .get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
     }
   }
 }
